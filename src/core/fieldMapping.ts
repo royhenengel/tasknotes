@@ -7,6 +7,24 @@ import {
 } from "../utils/dependencyUtils";
 import { validateCompleteInstances } from "../utils/dateUtils";
 
+function isParkedKey(key: string | undefined | null): boolean {
+	return !key || key.trim() === "";
+}
+
+function readFm(fm: Record<string, any>, key: string | undefined | null): any {
+	if (isParkedKey(key)) return undefined;
+	return fm[key as string];
+}
+
+function writeFm(
+	fm: Record<string, any>,
+	key: string | undefined | null,
+	value: any
+): void {
+	if (isParkedKey(key)) return;
+	fm[key as string] = value;
+}
+
 export function toUserField(mapping: FieldMapping, internalName: keyof FieldMapping): string {
 	return mapping[internalName];
 }
@@ -31,8 +49,9 @@ export function mapTaskFromFrontmatter(
 		path: filePath,
 	};
 
-	if (frontmatter[mapping.title] !== undefined) {
-		const normalized = normalizeTitleValue(frontmatter[mapping.title]);
+	const titleRaw = readFm(frontmatter, mapping.title);
+	if (titleRaw !== undefined) {
+		const normalized = normalizeTitleValue(titleRaw);
 		if (normalized !== undefined) {
 			mapped.title = normalized;
 		}
@@ -43,107 +62,121 @@ export function mapTaskFromFrontmatter(
 		}
 	}
 
-	if (frontmatter[mapping.status] !== undefined) {
-		const statusValue = frontmatter[mapping.status];
-		mapped.status = typeof statusValue === "boolean" ? (statusValue ? "true" : "false") : statusValue;
+	const statusRaw = readFm(frontmatter, mapping.status);
+	if (statusRaw !== undefined) {
+		mapped.status = typeof statusRaw === "boolean" ? (statusRaw ? "true" : "false") : statusRaw;
 	}
 
-	if (frontmatter[mapping.priority] !== undefined) {
-		mapped.priority = frontmatter[mapping.priority];
+	const priorityRaw = readFm(frontmatter, mapping.priority);
+	if (priorityRaw !== undefined) {
+		mapped.priority = priorityRaw;
 	}
 
-	if (frontmatter[mapping.due] !== undefined) {
-		mapped.due = frontmatter[mapping.due];
+	const dueRaw = readFm(frontmatter, mapping.due);
+	if (dueRaw !== undefined) {
+		mapped.due = dueRaw;
 	}
 
-	if (frontmatter[mapping.scheduled] !== undefined) {
-		mapped.scheduled = frontmatter[mapping.scheduled];
+	const scheduledRaw = readFm(frontmatter, mapping.scheduled);
+	if (scheduledRaw !== undefined) {
+		mapped.scheduled = scheduledRaw;
 	}
 
-	if (frontmatter[mapping.contexts] !== undefined) {
-		const contexts = frontmatter[mapping.contexts];
-		mapped.contexts = Array.isArray(contexts) ? contexts : [contexts];
+	const contextsRaw = readFm(frontmatter, mapping.contexts);
+	if (contextsRaw !== undefined) {
+		mapped.contexts = Array.isArray(contextsRaw) ? contextsRaw : [contextsRaw];
 	}
 
-	if (frontmatter[mapping.projects] !== undefined) {
-		const projects = frontmatter[mapping.projects];
-		mapped.projects = Array.isArray(projects) ? projects : [projects];
+	const projectsRaw = readFm(frontmatter, mapping.projects);
+	if (projectsRaw !== undefined) {
+		mapped.projects = Array.isArray(projectsRaw) ? projectsRaw : [projectsRaw];
 	}
 
-	if (frontmatter[mapping.timeEstimate] !== undefined) {
-		mapped.timeEstimate = frontmatter[mapping.timeEstimate];
+	const timeEstimateRaw = readFm(frontmatter, mapping.timeEstimate);
+	if (timeEstimateRaw !== undefined) {
+		mapped.timeEstimate = timeEstimateRaw;
 	}
 
-	if (frontmatter[mapping.completedDate] !== undefined) {
-		mapped.completedDate = frontmatter[mapping.completedDate];
+	const completedDateRaw = readFm(frontmatter, mapping.completedDate);
+	if (completedDateRaw !== undefined) {
+		mapped.completedDate = completedDateRaw;
 	}
 
-	if (frontmatter[mapping.recurrence] !== undefined) {
-		mapped.recurrence = frontmatter[mapping.recurrence];
+	const recurrenceRaw = readFm(frontmatter, mapping.recurrence);
+	if (recurrenceRaw !== undefined) {
+		mapped.recurrence = recurrenceRaw;
 	}
 
-	if (frontmatter[mapping.recurrenceAnchor] !== undefined) {
-		const anchorValue = frontmatter[mapping.recurrenceAnchor];
-		if (anchorValue === "scheduled" || anchorValue === "completion") {
-			mapped.recurrence_anchor = anchorValue;
+	const recurrenceAnchorRaw = readFm(frontmatter, mapping.recurrenceAnchor);
+	if (recurrenceAnchorRaw !== undefined) {
+		if (recurrenceAnchorRaw === "scheduled" || recurrenceAnchorRaw === "completion") {
+			mapped.recurrence_anchor = recurrenceAnchorRaw;
 		} else {
-			console.warn(`Invalid recurrence_anchor value: ${anchorValue}, defaulting to 'scheduled'`);
+			console.warn(`Invalid recurrence_anchor value: ${recurrenceAnchorRaw}, defaulting to 'scheduled'`);
 			mapped.recurrence_anchor = "scheduled";
 		}
 	}
 
-	if (frontmatter[mapping.dateCreated] !== undefined) {
-		mapped.dateCreated = frontmatter[mapping.dateCreated];
+	const dateCreatedRaw = readFm(frontmatter, mapping.dateCreated);
+	if (dateCreatedRaw !== undefined) {
+		mapped.dateCreated = dateCreatedRaw;
 	}
 
-	if (frontmatter[mapping.dateModified] !== undefined) {
-		mapped.dateModified = frontmatter[mapping.dateModified];
+	const dateModifiedRaw = readFm(frontmatter, mapping.dateModified);
+	if (dateModifiedRaw !== undefined) {
+		mapped.dateModified = dateModifiedRaw;
 	}
 
-	if (frontmatter[mapping.timeEntries] !== undefined) {
-		const timeEntriesValue = frontmatter[mapping.timeEntries];
-		mapped.timeEntries = Array.isArray(timeEntriesValue) ? timeEntriesValue : [];
+	const timeEntriesRaw = readFm(frontmatter, mapping.timeEntries);
+	if (timeEntriesRaw !== undefined) {
+		mapped.timeEntries = Array.isArray(timeEntriesRaw) ? timeEntriesRaw : [];
 	}
 
-	if (frontmatter[mapping.completeInstances] !== undefined) {
-		mapped.complete_instances = validateCompleteInstances(frontmatter[mapping.completeInstances]);
+	const completeInstancesRaw = readFm(frontmatter, mapping.completeInstances);
+	if (completeInstancesRaw !== undefined) {
+		mapped.complete_instances = validateCompleteInstances(completeInstancesRaw);
 	}
 
-	if (frontmatter[mapping.skippedInstances] !== undefined) {
-		mapped.skipped_instances = validateCompleteInstances(frontmatter[mapping.skippedInstances]);
+	const skippedInstancesRaw = readFm(frontmatter, mapping.skippedInstances);
+	if (skippedInstancesRaw !== undefined) {
+		mapped.skipped_instances = validateCompleteInstances(skippedInstancesRaw);
 	}
 
-	if (mapping.blockedBy && frontmatter[mapping.blockedBy] !== undefined) {
-		const dependencies = normalizeDependencyList(frontmatter[mapping.blockedBy]);
-		if (dependencies) {
-			mapped.blockedBy = dependencies;
+	if (mapping.blockedBy) {
+		const blockedByRaw = readFm(frontmatter, mapping.blockedBy);
+		if (blockedByRaw !== undefined) {
+			const dependencies = normalizeDependencyList(blockedByRaw);
+			if (dependencies) {
+				mapped.blockedBy = dependencies;
+			}
 		}
 	}
 
-	if (frontmatter[mapping.icsEventId] !== undefined) {
-		const icsEventId = frontmatter[mapping.icsEventId];
-		mapped.icsEventId = Array.isArray(icsEventId) ? icsEventId : [icsEventId];
+	const icsEventIdRaw = readFm(frontmatter, mapping.icsEventId);
+	if (icsEventIdRaw !== undefined) {
+		mapped.icsEventId = Array.isArray(icsEventIdRaw) ? icsEventIdRaw : [icsEventIdRaw];
 	}
 
-	if (frontmatter[mapping.googleCalendarEventId] !== undefined) {
-		mapped.googleCalendarEventId = frontmatter[mapping.googleCalendarEventId];
+	const googleCalendarEventIdRaw = readFm(frontmatter, mapping.googleCalendarEventId);
+	if (googleCalendarEventIdRaw !== undefined) {
+		mapped.googleCalendarEventId = googleCalendarEventIdRaw;
 	}
 
-	if (frontmatter[mapping.reminders] !== undefined) {
-		const reminders = frontmatter[mapping.reminders];
-		if (Array.isArray(reminders)) {
-			const filteredReminders = reminders.filter((r) => r != null);
+	const remindersRaw = readFm(frontmatter, mapping.reminders);
+	if (remindersRaw !== undefined) {
+		if (Array.isArray(remindersRaw)) {
+			const filteredReminders = remindersRaw.filter((r) => r != null);
 			if (filteredReminders.length > 0) {
 				mapped.reminders = filteredReminders;
 			}
-		} else if (reminders != null) {
-			mapped.reminders = [reminders];
+		} else if (remindersRaw != null) {
+			mapped.reminders = [remindersRaw];
 		}
 	}
 
-	if (frontmatter[mapping.sortOrder] !== undefined) {
-		const val = frontmatter[mapping.sortOrder];
-		mapped.sortOrder = typeof val === "string" ? val : String(val);
+	const sortOrderRaw = readFm(frontmatter, mapping.sortOrder);
+	if (sortOrderRaw !== undefined) {
+		mapped.sortOrder = typeof sortOrderRaw === "string" ? sortOrderRaw : String(sortOrderRaw);
 	}
 
 	if (frontmatter.tags && Array.isArray(frontmatter.tags)) {
@@ -163,80 +196,80 @@ export function mapTaskToFrontmatter(
 	const frontmatter: Record<string, any> = {};
 
 	if (taskData.title !== undefined) {
-		frontmatter[mapping.title] = taskData.title;
+		writeFm(frontmatter, mapping.title, taskData.title);
 	}
 
 	if (taskData.status !== undefined) {
 		const lower = taskData.status.toLowerCase();
 		const coercedValue =
 			lower === "true" || lower === "false" ? lower === "true" : taskData.status;
-		frontmatter[mapping.status] = coercedValue;
+		writeFm(frontmatter, mapping.status, coercedValue);
 	}
 
 	if (taskData.priority !== undefined) {
-		frontmatter[mapping.priority] = taskData.priority;
+		writeFm(frontmatter, mapping.priority, taskData.priority);
 	}
 
 	if (taskData.due !== undefined) {
-		frontmatter[mapping.due] = taskData.due;
+		writeFm(frontmatter, mapping.due, taskData.due);
 	}
 
 	if (taskData.scheduled !== undefined) {
-		frontmatter[mapping.scheduled] = taskData.scheduled;
+		writeFm(frontmatter, mapping.scheduled, taskData.scheduled);
 	}
 
 	if (
 		taskData.contexts !== undefined &&
 		(!Array.isArray(taskData.contexts) || taskData.contexts.length > 0)
 	) {
-		frontmatter[mapping.contexts] = taskData.contexts;
+		writeFm(frontmatter, mapping.contexts, taskData.contexts);
 	}
 
 	if (
 		taskData.projects !== undefined &&
 		(!Array.isArray(taskData.projects) || taskData.projects.length > 0)
 	) {
-		frontmatter[mapping.projects] = taskData.projects;
+		writeFm(frontmatter, mapping.projects, taskData.projects);
 	}
 
 	if (taskData.timeEstimate !== undefined) {
-		frontmatter[mapping.timeEstimate] = taskData.timeEstimate;
+		writeFm(frontmatter, mapping.timeEstimate, taskData.timeEstimate);
 	}
 
 	if (taskData.completedDate !== undefined) {
-		frontmatter[mapping.completedDate] = taskData.completedDate;
+		writeFm(frontmatter, mapping.completedDate, taskData.completedDate);
 	}
 
 	if (taskData.recurrence !== undefined) {
-		frontmatter[mapping.recurrence] = taskData.recurrence;
+		writeFm(frontmatter, mapping.recurrence, taskData.recurrence);
 	}
 
 	if (taskData.recurrence_anchor !== undefined) {
-		frontmatter[mapping.recurrenceAnchor] = taskData.recurrence_anchor;
+		writeFm(frontmatter, mapping.recurrenceAnchor, taskData.recurrence_anchor);
 	}
 
 	if (taskData.dateCreated !== undefined) {
-		frontmatter[mapping.dateCreated] = taskData.dateCreated;
+		writeFm(frontmatter, mapping.dateCreated, taskData.dateCreated);
 	}
 
 	if (taskData.dateModified !== undefined) {
-		frontmatter[mapping.dateModified] = taskData.dateModified;
+		writeFm(frontmatter, mapping.dateModified, taskData.dateModified);
 	}
 
 	if (taskData.sortOrder !== undefined) {
-		frontmatter[mapping.sortOrder] = taskData.sortOrder;
+		writeFm(frontmatter, mapping.sortOrder, taskData.sortOrder);
 	}
 
 	if (taskData.timeEntries !== undefined) {
-		frontmatter[mapping.timeEntries] = taskData.timeEntries;
+		writeFm(frontmatter, mapping.timeEntries, taskData.timeEntries);
 	}
 
 	if (taskData.complete_instances !== undefined) {
-		frontmatter[mapping.completeInstances] = taskData.complete_instances;
+		writeFm(frontmatter, mapping.completeInstances, taskData.complete_instances);
 	}
 
 	if (taskData.skipped_instances !== undefined && taskData.skipped_instances.length > 0) {
-		frontmatter[mapping.skippedInstances] = taskData.skipped_instances;
+		writeFm(frontmatter, mapping.skippedInstances, taskData.skipped_instances);
 	}
 
 	if (taskData.blockedBy !== undefined) {
@@ -245,19 +278,19 @@ export function mapTaskToFrontmatter(
 				.map((item) => normalizeDependencyEntry(item))
 				.filter((item): item is NonNullable<ReturnType<typeof normalizeDependencyEntry>> => !!item);
 			if (normalized.length > 0) {
-				frontmatter[mapping.blockedBy] = serializeDependencies(normalized);
+				writeFm(frontmatter, mapping.blockedBy, serializeDependencies(normalized));
 			}
 		} else {
-			frontmatter[mapping.blockedBy] = taskData.blockedBy;
+			writeFm(frontmatter, mapping.blockedBy, taskData.blockedBy);
 		}
 	}
 
 	if (taskData.icsEventId !== undefined && taskData.icsEventId.length > 0) {
-		frontmatter[mapping.icsEventId] = taskData.icsEventId;
+		writeFm(frontmatter, mapping.icsEventId, taskData.icsEventId);
 	}
 
 	if (taskData.reminders !== undefined && taskData.reminders.length > 0) {
-		frontmatter[mapping.reminders] = taskData.reminders;
+		writeFm(frontmatter, mapping.reminders, taskData.reminders);
 	}
 
 	let tags = taskData.tags ? [...taskData.tags] : [];

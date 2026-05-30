@@ -66,4 +66,74 @@ describe("core/fieldMapping", () => {
 		expect(result.valid).toBe(false);
 		expect(result.errors).toContain("Field mappings must have unique property names");
 	});
+
+	describe("parked field mappings (empty-string keys)", () => {
+		const parkedMapping = {
+			...DEFAULT_FIELD_MAPPING,
+			title: "",
+			priority: "",
+		};
+
+		it("mapTaskToFrontmatter does not write to frontmatter[''] for parked title", () => {
+			const frontmatter = mapTaskToFrontmatter(parkedMapping, {
+				title: "Real Task Title",
+				priority: "normal",
+			});
+			expect(frontmatter[""]).toBeUndefined();
+		});
+
+		it("mapTaskToFrontmatter does not write to frontmatter[''] for parked priority", () => {
+			const frontmatter = mapTaskToFrontmatter(parkedMapping, {
+				priority: "high",
+			});
+			expect(frontmatter[""]).toBeUndefined();
+		});
+
+		it("mapTaskToFrontmatter: parked title and priority do not collide on same key", () => {
+			const frontmatter = mapTaskToFrontmatter(parkedMapping, {
+				title: "Real Task Title",
+				priority: "normal",
+			});
+			expect(Object.prototype.hasOwnProperty.call(frontmatter, "")).toBe(false);
+		});
+
+		it("mapTaskFromFrontmatter: parked title falls back to filename when storeTitleInFilename=true", () => {
+			const frontmatter = { "": "normal" };
+			const mapped = mapTaskFromFrontmatter(
+				parkedMapping,
+				frontmatter,
+				"Tasks/Real Task Title.md",
+				true
+			);
+			expect(mapped.title).toBe("Real Task Title");
+		});
+
+		it("mapTaskFromFrontmatter: parked priority does not pick up garbage from frontmatter['']", () => {
+			const frontmatter = { "": "normal" };
+			const mapped = mapTaskFromFrontmatter(
+				parkedMapping,
+				frontmatter,
+				"Tasks/Real Task Title.md",
+				true
+			);
+			expect(mapped.priority).toBeUndefined();
+		});
+
+		it("regression: round-trip through parked mapping never corrupts title to priority value", () => {
+			const originalTask = {
+				title: "Real Task Title",
+				status: "todo",
+				priority: "normal",
+			};
+			const frontmatter = mapTaskToFrontmatter(parkedMapping, originalTask);
+			const roundTripped = mapTaskFromFrontmatter(
+				parkedMapping,
+				frontmatter,
+				"Tasks/Real Task Title.md",
+				true
+			);
+			expect(roundTripped.title).toBe("Real Task Title");
+			expect(roundTripped.title).not.toBe("normal");
+		});
+	});
 });
