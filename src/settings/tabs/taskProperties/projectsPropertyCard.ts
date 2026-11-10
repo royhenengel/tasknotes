@@ -53,7 +53,8 @@ export function renderProjectsPropertyCard(
 				plugin.settings.taskCreationDefaults.defaultProjects
 			)
 				.map((link) => link.replace(/\[\[|\]\]/g, "").trim())
-				.filter((path) => path);
+				.filter((path) => path)
+				.slice(0, 1);
 
 			projectPaths.forEach((path) => {
 				const file =
@@ -76,21 +77,16 @@ export function renderProjectsPropertyCard(
 				plugin.app,
 				plugin,
 				(file: TAbstractFile) => {
-					if (!selectedDefaultProjectFiles.includes(file)) {
-						selectedDefaultProjectFiles.push(file);
-						const projectLinks = selectedDefaultProjectFiles
-							.map((f) => `[[${f.path.replace(/\.md$/, "")}]]`)
-							.join(", ");
-						plugin.settings.taskCreationDefaults.defaultProjects = projectLinks;
-						save();
-						renderDefaultProjectsList(
-							projectsListContainer,
-							plugin,
-							save,
-							selectedDefaultProjectFiles,
-							translate
-						);
-					}
+					selectedDefaultProjectFiles.splice(0, selectedDefaultProjectFiles.length, file);
+					plugin.settings.taskCreationDefaults.defaultProjects = `[[${file.path.replace(/\.md$/, "")}]]`;
+					save();
+					renderDefaultProjectsList(
+						projectsListContainer,
+						plugin,
+						save,
+						selectedDefaultProjectFiles,
+						translate
+					);
 				}
 			);
 			modal.open();

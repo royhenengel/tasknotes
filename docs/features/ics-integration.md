@@ -91,7 +91,8 @@ Tasks are scheduled using the event's start time as an ISO timestamp, preserving
 - **Priority** - Set to the default task priority
 - **Contexts** - Event location is added as a context (if provided)
 - **Time Estimate** - Calculated from event duration (if start and end times are available)
-- **Tags** - Includes the ICS event tag and any default task tags
+- **ICS Event ID** - Stores the stable relationship to the calendar event
+- **Tags** - Added only when an optional ICS event tag is explicitly configured
 After creation, priority, status, and schedule can be edited if event data does not match the final task plan.
 
 ### Content
@@ -129,10 +130,9 @@ The ICS integration extends the field mapping system with two new fields:
 
 ### ICS Event Tag Field
 
-- Tag automatically applied to content created from events
-- Default tag is `ics_event`
-- Used to identify ICS-related content throughout the system
-- Can be customized through field mapping settings
+- Optional compatibility marker for workflows that still require a tag
+- Blank by default; `icsEventId` is the relationship authority
+- Can be configured through field mapping settings
 
 ## Template Variables
 
@@ -192,7 +192,7 @@ Calendar events are identified by their unique ICS event ID, which is maintained
 
 ### Content Type Detection
 
-The system distinguishes between tasks and notes by checking for the presence of the configured task tag in the content's frontmatter tags array, rather than relying on file structure or naming conventions.
+The system distinguishes tasks from notes using the configured TaskNotes identification method. Property-based identification is recommended; tag-based identification remains available for compatible vaults.
 
 ### Error Handling
 

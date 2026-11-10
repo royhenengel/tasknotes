@@ -341,10 +341,11 @@ function getCommonSchemas(): any {
 				},
 				projects: {
 					type: "array",
+					maxItems: 1,
 					items: {
 						type: "string",
 					},
-					description: "Associated projects",
+					description: "Owning project",
 				},
 				timeEstimate: {
 					type: "integer",
@@ -414,10 +415,11 @@ function getCommonSchemas(): any {
 				},
 				projects: {
 					type: "array",
+					maxItems: 1,
 					items: {
 						type: "string",
 					},
-					description: "Associated projects",
+					description: "Owning project",
 				},
 				details: {
 					type: "string",
@@ -727,8 +729,9 @@ function getCommonSchemas(): any {
 						},
 						projects: {
 							type: "array",
+							maxItems: 1,
 							items: { type: "string" },
-							description: "Associated projects",
+							description: "Owning project",
 						},
 					},
 					required: ["id", "title", "status"],

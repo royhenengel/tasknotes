@@ -37,6 +37,7 @@ import { generateLink, generateLinkWithDisplay, parseLinkToPath } from "../utils
 import { EmbeddableMarkdownEditor } from "../editor/EmbeddableMarkdownEditor";
 import { createTaskModalListField } from "./taskModalOrganizationFields";
 import { createTaskCard } from "../ui/TaskCard";
+import { normalizeSingleProject } from "../utils/projectUtils";
 
 interface DependencyItem {
 	dependency: TaskDependency;
@@ -1661,11 +1662,11 @@ export abstract class TaskModal extends Modal {
 		}
 
 		if (file instanceof TFile) {
-			this.selectedProjectItems.push({
+			this.selectedProjectItems = [{
 				file,
 				name: file.basename,
 				link: this.buildProjectReference(file, this.getCurrentTaskPath() || ""),
-			});
+			}];
 		}
 		this.updateProjectsFromFiles();
 		this.renderProjectsList();
@@ -1703,7 +1704,7 @@ export abstract class TaskModal extends Modal {
 		// Use the task's path as the source for resolving relative links
 		const sourcePath = this.getCurrentTaskPath() || "";
 
-		for (const projectString of projects) {
+		for (const projectString of normalizeSingleProject(projects)) {
 			// Skip null, undefined, or empty strings
 			if (
 				!projectString ||

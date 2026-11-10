@@ -3,6 +3,7 @@ import { TFile } from "obsidian";
 import TaskNotesPlugin from "../main";
 import { TaskInfo } from "../types";
 import { parseLinkToPath } from "../utils/linkUtils";
+import { normalizeSingleProject } from "../utils/projectUtils";
 
 export class ProjectSubtasksService {
 	private plugin: TaskNotesPlugin;
@@ -110,8 +111,8 @@ export class ProjectSubtasksService {
 			const projectsFieldName = this.plugin.fieldMapper.toUserField("projects");
 			if (!metadata?.frontmatter?.[projectsFieldName]) return false;
 
-			const projects = metadata.frontmatter[projectsFieldName];
-			if (!Array.isArray(projects)) return false;
+			const projects = normalizeSingleProject(metadata.frontmatter[projectsFieldName]);
+			if (projects.length === 0) return false;
 
 			// Check if any project reference resolves to our target
 			for (const project of projects) {
@@ -184,9 +185,9 @@ export class ProjectSubtasksService {
 
 				// Use the user's configured field mapping for projects
 				const projectsFieldName = this.plugin.fieldMapper.toUserField("projects");
-				const projects = metadata.frontmatter[projectsFieldName];
+				const projects = normalizeSingleProject(metadata.frontmatter[projectsFieldName]);
 
-				if (!Array.isArray(projects)) continue;
+				if (projects.length === 0) continue;
 
 				// Check if any project reference resolves to our target
 				for (const project of projects) {

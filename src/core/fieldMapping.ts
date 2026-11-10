@@ -6,6 +6,7 @@ import {
 	serializeDependencies,
 } from "../utils/dependencyUtils";
 import { validateCompleteInstances } from "../utils/dateUtils";
+import { normalizeSingleProject, serializeSingleProject } from "../utils/projectUtils";
 
 function isParkedKey(key: string | undefined | null): boolean {
 	return !key || key.trim() === "";
@@ -89,7 +90,7 @@ export function mapTaskFromFrontmatter(
 
 	const projectsRaw = readFm(frontmatter, mapping.projects);
 	if (projectsRaw !== undefined) {
-		mapped.projects = Array.isArray(projectsRaw) ? projectsRaw : [projectsRaw];
+		mapped.projects = normalizeSingleProject(projectsRaw);
 	}
 
 	const timeEstimateRaw = readFm(frontmatter, mapping.timeEstimate);
@@ -225,11 +226,8 @@ export function mapTaskToFrontmatter(
 		writeFm(frontmatter, mapping.contexts, taskData.contexts);
 	}
 
-	if (
-		taskData.projects !== undefined &&
-		(!Array.isArray(taskData.projects) || taskData.projects.length > 0)
-	) {
-		writeFm(frontmatter, mapping.projects, taskData.projects);
+	if (taskData.projects !== undefined) {
+		writeFm(frontmatter, mapping.projects, serializeSingleProject(taskData.projects));
 	}
 
 	if (taskData.timeEstimate !== undefined) {

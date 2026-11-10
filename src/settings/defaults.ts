@@ -44,7 +44,7 @@ export const DEFAULT_FIELD_MAPPING: FieldMapping = {
 	blockedBy: "blockedBy",
 	pomodoros: "pomodoros",
 	icsEventId: "icsEventId",
-	icsEventTag: "ics_event",
+	icsEventTag: "",
 	googleCalendarEventId: "googleCalendarEventId",
 	reminders: "reminders",
 	sortOrder: "tasknotes_manual_order",

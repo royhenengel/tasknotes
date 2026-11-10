@@ -1,6 +1,7 @@
 import { format } from "date-fns";
 import type { SpecFieldMapping } from "./specFieldMapping";
 import { denormalizeFrontmatter, resolveField } from "./specFieldMapping";
+import { normalizeSingleProject, serializeSingleProject } from "../utils/projectUtils";
 
 type UnknownRecord = Record<string, unknown>;
 const INVALID_PATH_SEGMENT_CHARS = new Set(['<', '>', ':', '"', '|', '?', '*']);
@@ -45,6 +46,10 @@ export async function createTaskWithCompat(
 	const taskType = getTaskTypeDef(collection);
 	const denormalized = denormalizeFrontmatter(roleFrontmatter, mapping);
 	const effectiveNow = now instanceof Date && !Number.isNaN(now.getTime()) ? now : new Date();
+	const projectsField = resolveField(mapping, "projects");
+	denormalized[projectsField] = serializeSingleProject(
+		denormalized[projectsField] ?? denormalized.projects
+	);
 
 	applyFieldDefaults(denormalized, taskType);
 	applyTimestampDefaults(denormalized, mapping, taskType, effectiveNow);
@@ -252,7 +257,7 @@ function buildTemplateValues(
 	const contexts = readStringList(frontmatter[contextsField] ?? frontmatter.contexts)
 		.map(sanitizeForPathSegment)
 		.join("-");
-	const projects = readStringList(frontmatter[projectsField] ?? frontmatter.projects)
+	const projects = normalizeSingleProject(frontmatter[projectsField] ?? frontmatter.projects)
 		.map(sanitizeForPathSegment)
 		.join("-");
 	const tags = readStringList(frontmatter[tagsField] ?? frontmatter.tags)

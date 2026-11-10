@@ -11,6 +11,7 @@ import {
 } from "./dateUtils";
 import { calculateTotalTimeSpent } from "./helpers";
 import { TaskNotesSettings } from "../types/settings";
+import { normalizeSingleProject } from "./projectUtils";
 
 /**
  * Just-in-time task manager that reads task information on-demand from Obsidian's
@@ -289,7 +290,7 @@ export class TaskManager extends Events {
 				archived: mappedTask.archived || false,
 				tags: Array.isArray(mappedTask.tags) ? mappedTask.tags : [],
 				contexts: Array.isArray(mappedTask.contexts) ? mappedTask.contexts : [],
-				projects: Array.isArray(mappedTask.projects) ? mappedTask.projects : [],
+				projects: normalizeSingleProject(mappedTask.projects),
 				// Computed fields
 				totalTrackedTime,
 				isBlocked,

@@ -10,6 +10,7 @@ import { FilenameContext, generateTaskFilename, generateUniqueFilename } from ".
 import { ensureFolderExists } from "../../utils/helpers";
 import { getCurrentTimestamp } from "../../utils/dateUtils";
 import { mergeTemplateFrontmatter } from "../../utils/templateProcessor";
+import { normalizeSingleProject } from "../../utils/projectUtils";
 import type TaskNotesPlugin from "../../main";
 
 interface TemplateApplicationResult {
@@ -45,6 +46,7 @@ export class TaskCreationService {
 			if (applyDefaults) {
 				taskData = await this.deps.applyTaskCreationDefaults(taskData);
 			}
+			taskData = { ...taskData, projects: normalizeSingleProject(taskData.projects) };
 
 			if (!taskData.title || !taskData.title.trim()) {
 				throw new Error("Title is required");
@@ -59,7 +61,7 @@ export class TaskCreationService {
 			const dateModified = taskData.dateModified || getCurrentTimestamp();
 
 			const contextsArray = taskData.contexts || [];
-			const projectsArray = taskData.projects || [];
+			const projectsArray = normalizeSingleProject(taskData.projects);
 			let tagsArray = taskData.tags || [];
 
 			if (plugin.settings.taskIdentificationMethod === "tag") {
@@ -94,7 +96,7 @@ export class TaskCreationService {
 				due: taskData.due || undefined,
 				scheduled: taskData.scheduled || undefined,
 				contexts: contextsArray.length > 0 ? contextsArray : undefined,
-				projects: projectsArray.length > 0 ? projectsArray : undefined,
+				projects: projectsArray,
 				timeEstimate:
 					taskData.timeEstimate && taskData.timeEstimate > 0 ? taskData.timeEstimate : undefined,
 				dateCreated,

@@ -67,17 +67,13 @@ describe('TaskCreationModal - projects with commas', () => {
     expect(data.projects).toEqual(['[[Money, Org & Adm]]']);
   });
 
-  it('should preserve multiple mixed projects including wikilinks with commas', () => {
+  it('should retain only the first project when multiple projects are entered', () => {
     const modal = new TaskCreationModal(mockApp, mockPlugin);
     (modal as any).title = 'Test';
     ;(modal as any).projects = '[[Money, Org & Adm]], [[Wellbeing|Health, Fitness & Mindset]]';
     ;(modal as any).tags = '';
 
     const data = (modal as any).buildTaskData();
-    expect(data.projects).toEqual([
-      '[[Money, Org & Adm]]',
-      '[[Wellbeing|Health, Fitness & Mindset]]'
-    ]);
+    expect(data.projects).toEqual(['[[Money, Org & Adm]]']);
   });
 });
-

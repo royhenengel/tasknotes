@@ -62,6 +62,55 @@ describe('ICSNoteService - Due Date from ICS End Time (Issue #1220)', () => {
 	});
 
 	describe('default behavior (useICSEndAsDue disabled)', () => {
+		it('uses icsEventId without adding a tag when no ICS tag is configured', async () => {
+			mockPlugin.fieldMapper.toUserField.mockImplementation((field: string) =>
+				field === 'icsEventTag' ? '' : field
+			);
+
+			const testEvent: ICSEvent = {
+				id: 'event-without-tag',
+				title: 'Calendar Event',
+				start: '2025-02-12T09:00:00',
+				end: '2025-02-12T10:00:00',
+				location: '',
+				description: '',
+				subscriptionId: 'test-sub',
+			};
+
+			await icsNoteService.createTaskFromICS(testEvent);
+
+			expect(mockTaskService.createTask).toHaveBeenCalledWith(
+				expect.objectContaining({
+					icsEventId: ['event-without-tag'],
+					tags: undefined,
+				}),
+				expect.anything()
+			);
+		});
+
+		it('adds the configured ICS tag when one is explicitly set', async () => {
+			mockPlugin.fieldMapper.toUserField.mockImplementation((field: string) =>
+				field === 'icsEventTag' ? 'tasknotes/ics-event' : field
+			);
+
+			const testEvent: ICSEvent = {
+				id: 'event-with-tag',
+				title: 'Calendar Event',
+				start: '2025-02-12T09:00:00',
+				end: '2025-02-12T10:00:00',
+				location: '',
+				description: '',
+				subscriptionId: 'test-sub',
+			};
+
+			await icsNoteService.createTaskFromICS(testEvent);
+
+			expect(mockTaskService.createTask).toHaveBeenCalledWith(
+				expect.objectContaining({ tags: ['tasknotes/ics-event'] }),
+				expect.anything()
+			);
+		});
+
 		it('should NOT set due date when useICSEndAsDue is false', async () => {
 			mockPlugin.settings.icsIntegration.useICSEndAsDue = false;
 

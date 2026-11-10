@@ -56,6 +56,26 @@ describe("core/fieldMapping", () => {
 		expect(frontmatter.tags).toEqual(expect.arrayContaining(["alpha", "task", "archived"]));
 	});
 
+	it("normalizes scalar and legacy multi-project frontmatter to one internal project", () => {
+		expect(mapTaskFromFrontmatter(
+			DEFAULT_FIELD_MAPPING,
+			{ projects: "[[LifeOS]]" },
+			"Tasks/One.md"
+		).projects).toEqual(["[[LifeOS]]"]);
+		expect(mapTaskFromFrontmatter(
+			DEFAULT_FIELD_MAPPING,
+			{ projects: ["[[LifeOS]]", "[[PAI]]"] },
+			"Tasks/Legacy.md"
+		).projects).toEqual(["[[LifeOS]]"]);
+	});
+
+	it("serializes project frontmatter as one scalar or an empty string", () => {
+		expect(mapTaskToFrontmatter(DEFAULT_FIELD_MAPPING, {
+			projects: ["[[LifeOS]]", "[[PAI]]"],
+		}).projects).toBe("[[LifeOS]]");
+		expect(mapTaskToFrontmatter(DEFAULT_FIELD_MAPPING, { projects: [] }).projects).toBe("");
+	});
+
 	it("validates duplicate mapping values as invalid", () => {
 		const duplicateMapping = {
 			...DEFAULT_FIELD_MAPPING,

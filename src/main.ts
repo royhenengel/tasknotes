@@ -33,6 +33,7 @@ import { openTaskSelector } from "./modals/TaskSelectorWithCreateModal";
 import { PomodoroService } from "./services/PomodoroService";
 import { formatTime, getActiveTimeEntry } from "./utils/helpers";
 import { convertUTCToLocalCalendarDate, getCurrentTimestamp } from "./utils/dateUtils";
+import { normalizeSingleProject } from "./utils/projectUtils";
 import { TaskManager } from "./utils/TaskManager";
 import { DependencyCache } from "./utils/DependencyCache";
 import { RequestDeduplicator, PredictivePrefetcher } from "./utils/RequestDeduplicator";
@@ -1164,9 +1165,7 @@ export default class TaskNotesPlugin extends Plugin {
 			contexts: frontmatter.contexts
 				? (Array.isArray(frontmatter.contexts) ? frontmatter.contexts : [frontmatter.contexts])
 				: undefined,
-			projects: frontmatter.projects
-				? (Array.isArray(frontmatter.projects) ? frontmatter.projects : [frontmatter.projects])
-				: undefined,
+			projects: normalizeSingleProject(frontmatter[this.fieldMapper.toUserField("projects")]),
 			tags: frontmatter.tags
 				? (Array.isArray(frontmatter.tags) ? frontmatter.tags : [frontmatter.tags])
 				: [],

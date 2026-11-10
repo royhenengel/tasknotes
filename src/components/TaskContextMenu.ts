@@ -20,6 +20,7 @@ import { generateLink } from "../utils/linkUtils";
 import { ContextMenu } from "./ContextMenu";
 import { buildTimeblockPrefillForTask } from "../utils/timeblockPrefillUtils";
 import { TimeblockCreationModal } from "../modals/TimeblockCreationModal";
+import { normalizeSingleProject } from "../utils/projectUtils";
 
 export interface TaskContextMenuOptions {
 	task: TaskInfo;
@@ -1000,7 +1001,7 @@ export class TaskContextMenu {
 
 			const projectReference = generateLink(plugin.app, projectFile, task.path, "", "", plugin.settings.useFrontmatterMarkdownLinks);
 			const legacyReference = `[[${projectFile.basename}]]`;
-			const currentProjects = Array.isArray(task.projects) ? task.projects : [];
+			const currentProjects = normalizeSingleProject(task.projects);
 
 			if (
 				currentProjects.includes(projectReference) ||
@@ -1010,8 +1011,7 @@ export class TaskContextMenu {
 				return;
 			}
 
-			const sanitizedProjects = currentProjects.filter((entry) => entry !== legacyReference);
-			const updatedProjects = [...sanitizedProjects, projectReference];
+			const updatedProjects = [projectReference];
 			const updatedTask = await plugin.updateTaskProperty(task, "projects", updatedProjects);
 			Object.assign(task, updatedTask);
 
@@ -1035,7 +1035,7 @@ export class TaskContextMenu {
 
 			const projectReference = generateLink(plugin.app, currentTaskFile, subtask.path, "", "", plugin.settings.useFrontmatterMarkdownLinks);
 			const legacyReference = `[[${currentTaskFile.basename}]]`;
-			const subtaskProjects = Array.isArray(subtask.projects) ? subtask.projects : [];
+			const subtaskProjects = normalizeSingleProject(subtask.projects);
 
 			if (
 				subtaskProjects.includes(projectReference) ||
@@ -1045,8 +1045,7 @@ export class TaskContextMenu {
 				return;
 			}
 
-			const sanitizedProjects = subtaskProjects.filter((entry) => entry !== legacyReference);
-			const updatedProjects = [...sanitizedProjects, projectReference];
+			const updatedProjects = [projectReference];
 			const updatedSubtask = await plugin.updateTaskProperty(subtask, "projects", updatedProjects);
 			Object.assign(subtask, updatedSubtask);
 

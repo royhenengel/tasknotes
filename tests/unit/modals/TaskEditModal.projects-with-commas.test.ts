@@ -51,5 +51,22 @@ describe('TaskEditModal - projects with commas', () => {
 
     expect(changes.projects).toEqual(['[[Money, Org & Adm]]']);
   });
-});
 
+  it('should retain only the first project when computing changes', () => {
+    const task: TaskInfo = {
+      title: 'T', status: 'open', priority: 'normal', path: 't.md', archived: false,
+      projects: []
+    } as any;
+    const modal = new TaskEditModal(mockApp, mockPlugin, { task });
+
+    (modal as any).title = task.title;
+    (modal as any).status = task.status;
+    (modal as any).priority = task.priority;
+    (modal as any).projects = '[[LifeOS]], [[PAI]]';
+    (modal as any).contexts = '';
+    (modal as any).tags = '';
+    (modal as any).timeEstimate = 0;
+
+    expect((modal as any).getChanges().projects).toEqual(['[[LifeOS]]']);
+  });
+});

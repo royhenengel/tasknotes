@@ -11,6 +11,7 @@ import {
 } from "../../utils/helpers";
 import { generateUniqueFilename } from "../../utils/filenameGenerator";
 import { getCurrentDateString, getCurrentTimestamp } from "../../utils/dateUtils";
+import { normalizeSingleProject, serializeSingleProject } from "../../utils/projectUtils";
 
 export interface TaskUpdateServiceDependencies {
 	plugin: TaskNotesPlugin;
@@ -38,6 +39,9 @@ export class TaskUpdateService {
 		originalTask: TaskInfo,
 		updates: Partial<TaskInfo> & { details?: string }
 	): Promise<TaskInfo> {
+		if (Object.prototype.hasOwnProperty.call(updates, "projects")) {
+			updates = { ...updates, projects: normalizeSingleProject(updates.projects) };
+		}
 		const { plugin } = this.deps;
 
 		try {
@@ -354,12 +358,7 @@ export class TaskUpdateService {
 		}
 		if (Object.prototype.hasOwnProperty.call(updates, "projects")) {
 			const projectsField = plugin.fieldMapper.toUserField("projects");
-			const projectsToSet = Array.isArray(updates.projects) ? updates.projects : [];
-			if (projectsToSet.length > 0) {
-				frontmatter[projectsField] = projectsToSet;
-			} else {
-				delete frontmatter[projectsField];
-			}
+			frontmatter[projectsField] = serializeSingleProject(updates.projects);
 		}
 		if (
 			Object.prototype.hasOwnProperty.call(updates, "timeEstimate") &&

@@ -23,6 +23,11 @@ export class ICSNoteService {
 		return this.plugin.i18n.translate(key, variables);
 	}
 
+	private getICSEventTags(): string[] {
+		const tag = (this.plugin.fieldMapper.toUserField("icsEventTag") || "").trim();
+		return tag ? [tag] : [];
+	}
+
 	/**
 	 * Create a new task from an ICS event
 	 */
@@ -43,6 +48,7 @@ export class ICSNoteService {
 					? overrides.scheduled
 					: this.computeScheduledFromICSEvent(icsEvent);
 
+			const icsEventTags = this.getICSEventTags();
 			const taskData: TaskCreationData = {
 				title: overrides?.title || icsEvent.title,
 				status: overrides?.status || this.plugin.settings.defaultTaskStatus,
@@ -59,7 +65,7 @@ export class ICSNoteService {
 				contexts:
 					overrides?.contexts || (icsEvent.location ? [icsEvent.location] : undefined),
 				projects: overrides?.projects,
-				tags: overrides?.tags || [this.plugin.fieldMapper.toUserField("icsEventTag")],
+				tags: overrides?.tags ?? (icsEventTags.length ? icsEventTags : undefined),
 				timeEstimate: overrides?.timeEstimate || this.calculateEventDuration(icsEvent),
 				details:
 					overrides?.details || this.buildICSEventDetails(icsEvent, subscriptionName),
@@ -220,12 +226,13 @@ export class ICSNoteService {
 			}
 
 			// Prepare ICS template data
+			const icsEventTags = this.getICSEventTags();
 			const icsTemplateData: ICSTemplateData = {
 				title: noteTitle,
 				priority: "",
 				status: "",
 				contexts: icsEvent.location ? [icsEvent.location] : [],
-				tags: [this.plugin.fieldMapper.toUserField("icsEventTag")],
+				tags: icsEventTags,
 				timeEstimate: 0,
 				dueDate: icsEvent.end || "",
 				scheduledDate: icsEvent.start || "",
@@ -248,7 +255,7 @@ export class ICSNoteService {
 				title: noteTitle,
 				[dateCreatedField]: getCurrentTimestamp(),
 				[dateModifiedField]: getCurrentTimestamp(),
-				tags: [this.plugin.fieldMapper.toUserField("icsEventTag")],
+				...(icsEventTags.length ? { tags: icsEventTags } : {}),
 				[this.plugin.fieldMapper.toUserField("icsEventId")]: [icsEvent.id],
 			};
 

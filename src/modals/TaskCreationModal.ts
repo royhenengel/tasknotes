@@ -31,6 +31,7 @@ import { ProjectMetadataResolver, ProjectEntry } from "../utils/projectMetadataR
 import { parseDisplayFieldsRow } from "../utils/projectAutosuggestDisplayFieldsParser";
 import { EmbeddableMarkdownEditor } from "../editor/EmbeddableMarkdownEditor";
 import { createNLPAutocomplete } from "../editor/NLPCodeMirrorAutocomplete";
+import { normalizeSingleProject } from "../utils/projectUtils";
 
 
 export interface TaskCreationOptions {
@@ -1295,7 +1296,7 @@ export class TaskCreationModal extends TaskModal {
 			.map((c) => c.trim())
 			.filter((c) => c.length > 0);
 
-		const projectList = splitListPreservingLinksAndQuotes(this.projects);
+		const projectList = normalizeSingleProject(splitListPreservingLinksAndQuotes(this.projects));
 		const tagList = sanitizeTags(this.tags)
 			.split(",")
 			.map((t) => t.trim())
@@ -1397,7 +1398,7 @@ export class TaskCreationModal extends TaskModal {
 
 				const projectReference = this.buildProjectReference(currentTaskFile, subtaskFile.path);
 				const legacyReference = `[[${currentTaskFile.basename}]]`;
-				const currentProjects = Array.isArray(subtaskInfo.projects) ? subtaskInfo.projects : [];
+				const currentProjects = normalizeSingleProject(subtaskInfo.projects);
 
 				if (
 					currentProjects.includes(projectReference) ||
@@ -1406,8 +1407,7 @@ export class TaskCreationModal extends TaskModal {
 					continue;
 				}
 
-				const sanitizedProjects = currentProjects.filter((entry) => entry !== legacyReference);
-				const updatedProjects = [...sanitizedProjects, projectReference];
+				const updatedProjects = [projectReference];
 				await this.plugin.updateTaskProperty(subtaskInfo, "projects", updatedProjects);
 			} catch (error) {
 				console.error("Failed to assign subtask:", error);

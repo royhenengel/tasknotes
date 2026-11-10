@@ -6,6 +6,7 @@ import { calculateTotalTimeSpent } from "../utils/helpers";
 import { format } from "date-fns";
 import { convertInternalToUserProperties } from "../utils/propertyMapping";
 import { DEFAULT_INTERNAL_VISIBLE_PROPERTIES } from "../settings/defaults";
+import { normalizeSingleProject } from "../utils/projectUtils";
 
 export interface BasesDataItem {
 	key?: string;
@@ -142,11 +143,7 @@ function createTaskInfoFromProperties(
 			: props.contexts
 				? [props.contexts]
 				: undefined,
-		projects: Array.isArray(props.projects)
-			? props.projects
-			: props.projects
-				? [props.projects]
-				: undefined,
+		projects: normalizeSingleProject(props.projects),
 		tags: Array.isArray(props.tags) ? props.tags : props.tags ? [props.tags] : undefined,
 		timeEstimate: props.timeEstimate,
 		completedDate: props.completedDate,

@@ -28,6 +28,7 @@ import { ReminderContextMenu } from "../components/ReminderContextMenu";
 import { generateLinkWithDisplay, parseLinkToPath } from "../utils/linkUtils";
 import { EmbeddableMarkdownEditor } from "../editor/EmbeddableMarkdownEditor";
 import { ConfirmationModal } from "./ConfirmationModal";
+import { normalizeSingleProject } from "../utils/projectUtils";
 
 export interface TaskEditOptions {
 	task: TaskInfo;
@@ -759,8 +760,8 @@ export class TaskEditModal extends TaskModal {
 		}
 
 		// Parse and compare projects
-		const newProjects = splitListPreservingLinksAndQuotes(this.projects);
-		const oldProjects = this.task.projects || [];
+		const newProjects = normalizeSingleProject(splitListPreservingLinksAndQuotes(this.projects));
+		const oldProjects = normalizeSingleProject(this.task.projects);
 
 		const normalizeProjectList = (projects: string[]): string[] =>
 			projects
@@ -1167,7 +1168,7 @@ export class TaskEditModal extends TaskModal {
 
 			const projectReference = this.buildProjectReference(parentTaskFile, subtaskFile.path);
 			const legacyReference = `[[${parentTaskFile.basename}]]`;
-			const currentProjects = Array.isArray(subtaskInfo.projects) ? subtaskInfo.projects : [];
+			const currentProjects = normalizeSingleProject(subtaskInfo.projects);
 
 			if (
 				currentProjects.includes(projectReference) ||
@@ -1176,8 +1177,7 @@ export class TaskEditModal extends TaskModal {
 				return;
 			}
 
-			const sanitizedProjects = currentProjects.filter((entry) => entry !== legacyReference);
-			const updatedProjects = [...sanitizedProjects, projectReference];
+			const updatedProjects = [projectReference];
 			await this.plugin.updateTaskProperty(subtaskInfo, "projects", updatedProjects);
 		} catch (error) {
 			console.error("Failed to add subtask relation:", error);
@@ -1191,7 +1191,7 @@ export class TaskEditModal extends TaskModal {
 
 			const projectReference = this.buildProjectReference(parentTaskFile, subtaskFile.path);
 			const legacyReference = `[[${parentTaskFile.basename}]]`;
-			const currentProjects = Array.isArray(subtaskInfo.projects) ? subtaskInfo.projects : [];
+			const currentProjects = normalizeSingleProject(subtaskInfo.projects);
 
 			const updatedProjects = currentProjects.filter(
 				(project) => project !== projectReference && project !== legacyReference
